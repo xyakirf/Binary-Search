@@ -1,73 +1,75 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "search.h"
 
-#define ERROR_OPEN_FILE 1
-#define ERROR_EMPTY_FILE 2
-#define ERROR_ALLOCATION_FILE 3
-#define ERROR_NOT_FOUND 4
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        return ERROR_INVALID_INPUT;
+    }
 
-int biSearch(const int arr[], int count, int target);
-
-int main(int argc, char *argv[]) {
-    if(argc < 2){
-        printf("no sigma enter parameter\n");
-        return ERROR_NOT_FOUND;
-        }
-
-    int target = atoi(argv[1]) // argv -> the target 😎
-    
-    FILE *fp = fopen("abc.txt", "r");
-    if(fp == NULL){
-        printf("Error\n");
+    const char *type = "r";
+    FILE* fp = fopen(argv[1], type);
+    if (fp == NULL) {
         return ERROR_OPEN_FILE;
     }
 
-    int count = 0; // counts how many numbers in the file
+    int integerCountInFile = 0; 
     int temp;
-    while(fscanf(fp, "%d",&temp) == 1)
-        count++;
-
-    if(count == 0){
-        return ERROR_EMPTY_FILE;
-        }
-
-    int* arr = malloc(count * sizeof(int));
-    if (arr == NULL){
-        printf("no sigma\n"); // mem alloc failed
-        return ERROR_ALLOCATION_FILE;
+    while (fscanf(fp, "%d", &temp) == 1) {
+        integerCountInFile++;
     }
+
+    if (integerCountInFile <= 0) {
+        fclose(fp);
+        return ERROR_EMPTY_FILE;
+    }
+
+    int* arr = allocateIntArray(integerCountInFile);
 
     rewind(fp);
-    for(int i = 0; i < count; i++){
-        fscanf(fp, "%d", &arr[i]);
+
+    for (int i = 0; i < integerCountInFile; i++) {
+        if (fscanf(fp, "%d", &arr[i]) != 1) {
+            free(arr);
+            fclose(fp);
+            return ERROR_INVALID_INPUT;
+        }
     }
+    fclose(fp);
 
-    int target;
-    scanf("%d", &target);
-
-    int result = biSearch(arr, count, target);
-    if (result == -1)
-        printf("no sigma\n"); // no target
-    else
-        printf("target %d index %d\n" ,target ,result);
-
+    int result = binarySearch(arr, integerCountInFile, atoi(argv[2]));
+    if (result == -1) {
+        printf("no sigma\n");
+    } else {
+        printf("target %d index %d\n", atoi(argv[2]), result);
+    }
+    
     free(arr);
-    return 0;
+    return SUCESS;
 }
 
-int biSearch(const int arr[] , int count , int target){
+int binarySearch(const int arr[], int integerCountInFile, int target) {
     int low = 0;
-    int high = count -1;
+    int high = integerCountInFile - 1;
+    int mid;
 
-    while(low <= high){
-        int mid = low + ((high - low) / 2);
-
-        if(arr[mid] == target)
+    while (low <= high) {
+        mid = low + ((high - low) / 2);
+        if (arr[mid] == target) {
             return mid;
-        else if (arr[mid] < target)
+        } else if (arr[mid] < target) {
             low = mid + 1;
-        else
+        } else {
             high = mid - 1;
+        }
     }
-    return -1; // if not found 
+    return -1;
+}
+
+int* allocateIntArray(int size) {
+    int* arr = malloc(size * sizeof(int));
+    if (!arr) {
+        exit(ERROR_ALLOCATION_FILE);
+    }
+    return arr;
 }
