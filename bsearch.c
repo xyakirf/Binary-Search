@@ -6,9 +6,16 @@
 #define ERROR_ALLOCATION_FILE 3
 #define ERROR_NOT_FOUND 4
 
-int biSearch(int arr[], int count, int target);
+int biSearch(const int arr[], int count, int target);
 
-int main() {
+int main(int argc, char *argv[]) {
+    if(argc < 2){
+        printf("no sigma enter parameter\n");
+        return ERROR_NOT_FOUND;
+        }
+
+    int target = atoi(argv[1]) // argv -> the target 😎
+    
     FILE *fp = fopen("abc.txt", "r");
     if(fp == NULL){
         printf("Error\n");
@@ -20,13 +27,13 @@ int main() {
     while(fscanf(fp, "%d",&temp) == 1)
         count++;
 
-    if(count > 0){
-        return ERR_EMPTY_FILE;
+    if(count == 0){
+        return ERROR_EMPTY_FILE;
         }
 
     int* arr = malloc(count * sizeof(int));
     if (arr == NULL){
-        printf("no sigma\n");
+        printf("no sigma\n"); // mem alloc failed
         return ERROR_ALLOCATION_FILE;
     }
 
@@ -40,7 +47,7 @@ int main() {
 
     int result = biSearch(arr, count, target);
     if (result == -1)
-        printf("no sigma");
+        printf("no sigma\n"); // no target
     else
         printf("target %d index %d\n" ,target ,result);
 
@@ -49,7 +56,7 @@ int main() {
 }
 
 int biSearch(const int arr[] , int count , int target){
-    int low = 0 
+    int low = 0;
     int high = count -1;
 
     while(low <= high){
