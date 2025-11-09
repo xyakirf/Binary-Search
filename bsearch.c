@@ -24,7 +24,11 @@ int main(int argc, char* argv[]) {
         return ERROR_EMPTY_FILE;
     }
 
-    int* arr = allocateIntArray(integerCountInFile);
+    int* arr = allocateArray(integerCountInFile, sizeof(int));
+    if (arr == NULL) {
+        fclose(fp);
+        return ERROR_ALLOCATION_FILE;
+    }
 
     rewind(fp);
 
@@ -35,7 +39,6 @@ int main(int argc, char* argv[]) {
             return ERROR_INVALID_INPUT;
         }
     }
-    fclose(fp);
 
     int result = binarySearch(arr, integerCountInFile, atoi(argv[2]));
     if (result == -1) {
@@ -43,9 +46,11 @@ int main(int argc, char* argv[]) {
     } else {
         printf("target %d index %d\n", atoi(argv[2]), result);
     }
-    
+
     free(arr);
-    return SUCESS;
+    fclose(fp); 
+
+    return SUCCESS;
 }
 
 int binarySearch(const int arr[], int integerCountInFile, int target) {
@@ -66,10 +71,10 @@ int binarySearch(const int arr[], int integerCountInFile, int target) {
     return -1;
 }
 
-int* allocateIntArray(int size) {
-    int* arr = malloc(size * sizeof(int));
+void* allocateArray(int size, size_t sizeType) {
+    void* arr = malloc(size * sizeType);
     if (!arr) {
-        exit(ERROR_ALLOCATION_FILE);
+        return NULL;
     }
     return arr;
 }
